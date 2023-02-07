@@ -1,0 +1,13 @@
+@import "base.css";
+
+:root {
+    --c-dark-background: var(--vt-c-black);
+    --c-dark-background-soft: var(--vt-c-black-soft);
+    --c-dark-background-mute: var(--vt-c-black-mute);
+    --c-dark-border: var(--vt-c-divider-dark-2);
+    --c-dark-border-hover: var(--vt-c-divider-dark-1);
+    --c-dark-heading: var(--vt-c-text-dark-1);
+    --c-dark-text: var(--vt-c-text-dark-2);
+
+    /* more colors here... */
+}

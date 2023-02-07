@@ -56,8 +56,8 @@ export default {
 
 header {
 	padding: 1rem 1.5rem 1rem;
-	background-color: #369;
-	color: #fff;
+	background-color: var(--c-top-header-bg);
+	color: var(--c-top-header-fg);
 }
 
 main {

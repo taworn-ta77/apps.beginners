@@ -1,0 +1,13 @@
+@import "base.css";
+
+:root {
+    --c-lite-background: var(--vt-c-white);
+    --c-lite-background-soft: var(--vt-c-white-soft);
+    --c-lite-background-mute: var(--vt-c-white-mute);
+    --c-lite-border: var(--vt-c-divider-light-2);
+    --c-lite-border-hover: var(--vt-c-divider-light-1);
+    --c-lite-heading: var(--vt-c-text-light-1);
+    --c-lite-text: var(--vt-c-text-light-1);
+
+    /* more colors here... */
+}

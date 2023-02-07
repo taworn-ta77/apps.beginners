@@ -1,0 +1,29 @@
+@import "base.css";
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-default-background: var(--vt-c-black);
+        --c-default-background-soft: var(--vt-c-black-soft);
+        --c-default-background-mute: var(--vt-c-black-mute);
+        --c-default-border: var(--vt-c-divider-dark-2);
+        --c-default-border-hover: var(--vt-c-divider-dark-1);
+        --c-default-heading: var(--vt-c-text-dark-1);
+        --c-default-text: var(--vt-c-text-dark-2);
+
+        /* more colors here... */
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --c-default-background: var(--vt-c-white);
+        --c-default-background-soft: var(--vt-c-white-soft);
+        --c-default-background-mute: var(--vt-c-white-mute);
+        --c-default-border: var(--vt-c-divider-light-2);
+        --c-default-border-hover: var(--vt-c-divider-light-1);
+        --c-default-heading: var(--vt-c-text-light-1);
+        --c-default-text: var(--vt-c-text-light-1);
+
+        /* more colors here... */
+    }
+}

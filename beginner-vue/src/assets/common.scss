@@ -1,0 +1,45 @@
+@import './base.css';
+@import './theme-blue.scss';
+@import './theme-green.scss';
+@import './theme-orange.scss';
+@import './tone-default.scss';
+@import './tone-dark.scss';
+@import './tone-lite.scss';
+
+:root {
+	--c-top-header-bg: #000;
+	--c-top-header-fg: #fff;
+
+	--c-background: var(--vt-c-white);
+	--c-background-soft: var(--vt-c-white-soft);
+	--c-background-mute: var(--vt-c-white-mute);
+	--c-border: var(--vt-c-divider-light-2);
+	--c-border-hover: var(--vt-c-divider-light-1);
+	--c-heading: var(--vt-c-text-light-1);
+	--c-text: var(--vt-c-text-light-1);
+
+	/* more colors here... */
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	position: relative;
+	font-weight: normal;
+}
+
+body {
+	min-height: 100vh;
+	color: var(--c-text);
+	background: var(--c-background);
+	transition: color 0.5s, background-color 0.5s;
+	line-height: 1.6;
+	font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-size: 15px;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
