@@ -1,13 +1,3 @@
-export enum MessageBoxResult {
-	none = -1,
-	close = 0,
-	ok = 1,
-	cancel = 2,
-	yes = 3,
-	no = 4,
-	retry = 5,
-}
-
 export enum MessageBoxType {
 	close = 0,
 	ok = 1,
@@ -25,5 +15,5 @@ export interface MessageBoxOptions {
 	barrierBackground?: string;
 	titleBackground?: string;
 	titleColor?: string;
-	callback?: (result: MessageBoxResult) => void;
+	callback?: (result: boolean) => void;
 }

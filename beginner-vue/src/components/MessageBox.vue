@@ -1,28 +1,38 @@
 <template>
     <div v-if="opened" class="shader" :style="{ background: options.barrierBackground }" @click.prevent="shader">
         <div class="center">
-            <div class="dialog" @keydown="handleKeyDownEscape">
+            <div class="dialog">
                 <div class="head" :style="{ background: options.titleBackground, color: options.titleColor }">{{
                     options.caption
                 }}</div>
+
                 <div class="body" v-html="options.content"></div>
+
                 <div class="actions" ref="actions">
-                    <button ref="close" @click.prevent="close(MessageBoxResult.close)" @keydown="handleKeyDownButton"
-                        v-show="options.type === MessageBoxType.close">{{ $t('close') }}</button>
-                    <button ref="ok" @click.prevent="close(MessageBoxResult.ok)" @keydown="handleKeyDownButton"
+                    <button ref="close" @click.prevent="close(false)" @keydown="handleKeyDownButton"
+                        v-show="options.type === MessageBoxType.close">{{
+                            $t('close')
+                        }}</button>
+                    <button ref="ok" @click.prevent="close(true)" @keydown="handleKeyDownButton"
                         v-show="options.type === MessageBoxType.ok || options.type === MessageBoxType.okCancel">{{
                             $t('ok')
                         }}</button>
-                    <button ref="retry" @click.prevent="close(MessageBoxResult.retry)" @keydown="handleKeyDownButton"
-                        v-show="options.type === MessageBoxType.retryCancel">{{ $t('retry') }}</button>
-                    <button ref="cancel" @click.prevent="close(MessageBoxResult.cancel)" @keydown="handleKeyDownButton"
+                    <button ref="retry" @click.prevent="close(true)" @keydown="handleKeyDownButton"
+                        v-show="options.type === MessageBoxType.retryCancel">{{
+                            $t('retry')
+                        }}</button>
+                    <button ref="cancel" @click.prevent="close(false)" @keydown="handleKeyDownButton"
                         v-show="options.type === MessageBoxType.okCancel || options.type === MessageBoxType.retryCancel">{{
                             $t('cancel')
                         }}</button>
-                    <button ref="yes" @click.prevent="close(MessageBoxResult.yes)" @keydown="handleKeyDownButton"
-                        v-show="options.type === MessageBoxType.yesNo">{{ $t('yes') }}</button>
-                    <button ref="no" @click.prevent="close(MessageBoxResult.no)" @keydown="handleKeyDownButton"
-                        v-show="options.type === MessageBoxType.yesNo">{{ $t('no') }}</button>
+                    <button ref="yes" @click.prevent="close(true)" @keydown="handleKeyDownButton"
+                        v-show="options.type === MessageBoxType.yesNo">{{
+                            $t('yes')
+                        }}</button>
+                    <button ref="no" @click.prevent="close(false)" @keydown="handleKeyDownButton"
+                        v-show="options.type === MessageBoxType.yesNo">{{
+                            $t('no')
+                        }}</button>
                 </div>
             </div>
         </div>
@@ -31,11 +41,8 @@
 
 
 <script setup lang="ts">
-import {
-    MessageBoxResult,
-    MessageBoxType,
-    type MessageBoxOptions,
-} from './MessageBox';
+import { MessageBoxType, type MessageBoxOptions } from './MessageBox';
+
 export type HTMLDivRef = InstanceType<typeof HTMLDivElement>;
 export type HTMLButtonRef = InstanceType<typeof HTMLButtonElement>;
 </script>
@@ -45,6 +52,7 @@ export type HTMLButtonRef = InstanceType<typeof HTMLButtonElement>;
 export default {
     expose: [
         'setDefaults',
+        'isOpen',
         'open',
         'info',
         'warning',
@@ -68,9 +76,9 @@ export default {
             options: <MessageBoxOptions>{
             },
             opened: false,
-            result: MessageBoxResult.none,
             firstKey: <HTMLButtonRef | null>null,
             lastKey: <HTMLButtonRef | null>null,
+            timer: 0,
         };
     },
 
@@ -78,14 +86,19 @@ export default {
     },
 
     methods: {
+        /**
+         * Handles ESC key.
+         */
         handleKeyDownEscape: function (event: KeyboardEvent) {
-            console.log(`key: ${event.key}`);
             if (event.key === 'Escape') {
-                this.close(MessageBoxResult.close);
+                this.close(false);
                 event.preventDefault();
             }
         },
 
+        /**
+         * Handles Tab/Shift+Tab keys.
+         */
         handleKeyDownButton: function (event: KeyboardEvent) {
             if (event.key === 'Tab') {
                 if (event.shiftKey) {
@@ -103,24 +116,50 @@ export default {
             }
         },
 
+        /**
+         * Set defaults options, before calling open().
+         */
         setDefaults: function (options: MessageBoxOptions): void {
             this.defaultOptions = { ...options };
         },
 
+        /**
+         * Closes automatically if barrierDismissible is true.
+         */
         shader: function (): void {
             if (this.opened && this.options.barrierDismissible) {
-                this.close(MessageBoxResult.close);
+                this.close(false);
             }
         },
 
+        /**
+         * Changes CR/LF to <br/>.
+         */
         nl2br: function (s: string): string {
-            return s.replace(/\r\n|\n|\r/gm, "<br/>");
+            return s.replace(/\r\n|\n|\r/gm, '<br/>');
         },
 
-        open: function (options: MessageBoxOptions): void {
+        /**
+         * Checks if the message box is opened or not.
+         */
+        isOpen: function (): boolean {
+            return this.opened;
+        },
+
+        /**
+         * Opens message box.
+         * Return true if the message box is opened successfully.
+         * Otherwise, it is false.
+         */
+        open: function (options: MessageBoxOptions): boolean {
+            // checks if it already opened
+            if (this.opened) {
+                return false;
+            }
+
             this.options = { ...this.defaultOptions };
             this.options.caption = options.caption;
-            this.options.content = options.content;
+            this.options.content = this.nl2br(options.content);
             this.options.type = options.type;
             if (typeof options.alternateFocus === 'boolean')
                 this.options.alternateFocus = options.alternateFocus;
@@ -134,10 +173,9 @@ export default {
                 this.options.titleColor = options.titleColor;
             this.options.callback = options.callback;
             this.opened = true;
-            this.result = MessageBoxResult.none;
             window.addEventListener('keydown', this.handleKeyDownEscape);
 
-            setTimeout(() => {
+            this.timer = setTimeout(() => {
                 if (this.options.type === MessageBoxType.close) {
                     const button = this.$refs.close as HTMLButtonRef;
                     this.firstKey = button;
@@ -169,10 +207,15 @@ export default {
                     button.focus();
                 }
             }, 0);
+
+            return true;
         },
 
-        info: function (content: string, callback?: (result: MessageBoxResult) => void): void {
-            this.open({
+        /**
+         * Opens infomation box.
+         */
+        info: function (content: string, callback?: (result: boolean) => void): boolean {
+            return this.open({
                 caption: this.$t('info'),
                 content,
                 type: MessageBoxType.close,
@@ -185,8 +228,11 @@ export default {
             });
         },
 
-        warning: function (content: string, callback?: (result: MessageBoxResult) => void): void {
-            this.open({
+        /**
+         * Opens warning box.
+         */
+        warning: function (content: string, callback?: (result: boolean) => void): boolean {
+            return this.open({
                 caption: this.$t('warning'),
                 content,
                 type: MessageBoxType.close,
@@ -199,8 +245,11 @@ export default {
             });
         },
 
-        error: function (content: string, callback?: (result: MessageBoxResult) => void): void {
-            this.open({
+        /**
+         * Opens error box.
+         */
+        error: function (content: string, callback?: (result: boolean) => void): boolean {
+            return this.open({
                 caption: this.$t('error'),
                 content,
                 type: MessageBoxType.close,
@@ -213,8 +262,11 @@ export default {
             });
         },
 
-        question: function (content: string, callback?: (result: MessageBoxResult) => void): void {
-            this.open({
+        /**
+         * Opens question box.
+         */
+        question: function (content: string, callback?: (result: boolean) => void): boolean {
+            return this.open({
                 caption: this.$t('question'),
                 content,
                 type: MessageBoxType.yesNo,
@@ -227,25 +279,22 @@ export default {
             });
         },
 
-        close: function (result: MessageBoxResult): void {
-            window.removeEventListener('keydown', this.handleKeyDownEscape);
-            this.opened = false;
-            this.result = result;
-            console.log(`result: ${this.result}`);
-            this.$emit('message-box-closed', this.result);
-            if (this.options.callback)
-                this.options.callback(this.result);
+        /**
+         * Closes the message box.
+         */
+        close: function (result: boolean): void {
+            if (this.opened) {
+                clearTimeout(this.timer);
+                window.removeEventListener('keydown', this.handleKeyDownEscape);
+                this.opened = false;
+                this.$emit('message-box-closed', result);
+                if (this.options.callback)
+                    this.options.callback(result);
+            }
         },
     },
 
     watch: {
-        /*
-        opened: function (value: boolean, oldValue: boolean) {
-            if (oldValue === true && value === false) {
-                console.log(`I will closing...`);
-            }
-        },
-        */
     },
 
     i18n: {
@@ -281,8 +330,6 @@ export default {
 
 
 <style scoped lang="scss">
-@import '../assets/main.css';
-
 $border-radius-width: 0.75rem;
 $shadow-width: 0.25rem;
 $shadow-height: 0.25rem;
@@ -301,7 +348,6 @@ $button-min-width: 5rem;
 
 .shader {
     position: fixed;
-    z-index: 999;
     left: 0px;
     top: 0px;
     width: 100%;

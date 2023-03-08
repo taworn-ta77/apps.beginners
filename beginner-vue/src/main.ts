@@ -5,6 +5,8 @@ import { messages as en } from './locales/en';
 import { messages as th } from './locales/th';
 import router from './router';
 import './assets/main.css';
+import MessageBox from './components/MessageBox.vue';
+import WaitBox from './components/WaitBox.vue';
 import AppBox from './layouts/AppBox.vue';
 import App from './App.vue';
 
@@ -24,5 +26,7 @@ app
 	.use(i18n)
 	.use(createPinia())
 	.use(router)
+	.component('MessageBox', MessageBox)
+	.component('WaitBox', WaitBox)
 	.component('AppBox', AppBox)
 	.mount('#app');

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { inject } from 'vue';
 import type { I18n } from 'vue-i18n';
+import type { MessageBoxOptions } from '@/components/MessageBox';
 
 /**
  * Application singleton store class.
@@ -10,12 +11,12 @@ export const useAppStore = defineStore({
 
 	state: () => ({
 		/**
-		 * Inject i18n.
+		 * Injects i18n.
 		 */
 		i18n: <I18n>inject('i18n'),
 
 		/**
-		 * Available theme list.
+		 * Availables theme list.
 		 */
 		themeList: [
 			'blue',
@@ -29,7 +30,7 @@ export const useAppStore = defineStore({
 		theme: '',
 
 		/**
-		 * Available tone list.
+		 * Availables tone list.
 		 */
 		toneList: [
 			'default',
@@ -41,6 +42,11 @@ export const useAppStore = defineStore({
 		 * Current tone name.
 		 */
 		tone: '',
+
+		/**
+		 * DialogBox instance.
+		 */
+		dialogBox: <any>null,
 
 		//
 		// more state variables here...
@@ -59,12 +65,20 @@ export const useAppStore = defineStore({
 			this.setTone(localStorage.getItem('tone') || '');
 		},
 
+		/**
+		 * Setup UI dialog box.
+		 */
+		setupUi(dialogBox: any): void {
+			this.dialogBox = dialogBox;
+		},
+
 		// ----------------------------------------------------------------------
 
 		/**
-		 * Change current locale.
+		 * Changes current locale.
 		 */
 		setLocale(locale: string): void {
+			// set current locale
 			this.i18n.global.locale = locale;
 			console.log(`current locale: ${this.i18n.global.locale}`);
 
@@ -74,10 +88,10 @@ export const useAppStore = defineStore({
 		},
 
 		/**
-		 * Change current theme.
+		 * Changes current theme.
 		 */
 		setTheme(theme: string): void {
-			// validate parameter and reset theme to default if it is not right
+			// validates parameter and reset theme to default if it is not right
 			const index = this.themeList.findIndex((e: string) => e === theme);
 			if (index < 0 || index >= this.themeList.length)
 				theme = this.themeList[0];
@@ -97,10 +111,10 @@ export const useAppStore = defineStore({
 		},
 
 		/**
-		 * Change current tone.
+		 * Changes current tone.
 		 */
 		setTone(tone: string): void {
-			// validate parameter and reset tone to default if it is not right
+			// validates parameter and reset tone to default if it is not right
 			const index = this.toneList.findIndex((e: string) => e === tone);
 			if (index < 0 || index >= this.toneList.length)
 				tone = this.toneList[0];
@@ -122,6 +136,81 @@ export const useAppStore = defineStore({
 			// NOTE:
 			// comment this line(s) if you want to use other save feature
 			localStorage.setItem('tone', this.tone);
+		},
+
+		// ----------------------------------------------------------------------
+
+		/**
+		 * Checks if the message box is opened or not.
+		 */
+		isMessageBoxOpen: function (): boolean {
+			return this.dialogBox.isMessageBoxOpen();
+		},
+
+		/**
+		 * Opens message box.
+		 */
+		messageBox: function (options: MessageBoxOptions): boolean {
+			return this.dialogBox.open(options);
+		},
+
+		/**
+		 * Opens infomation box.
+		 */
+		info: function (content: string, callback?: (result: boolean) => void): boolean {
+			return this.dialogBox.info(content, callback);
+		},
+
+		/**
+		 * Opens warning box.
+		 */
+		warning: function (content: string, callback?: (result: boolean) => void): boolean {
+			return this.dialogBox.warning(content, callback);
+		},
+
+		/**
+		 * Opens error box.
+		 */
+		error: function (content: string, callback?: (result: boolean) => void): boolean {
+			return this.dialogBox.error(content, callback);
+		},
+
+		/**
+		 * Opens question box.
+		 */
+		question: function (content: string, callback?: (result: boolean) => void): boolean {
+			return this.dialogBox.question(content, callback);
+		},
+
+		/**
+		 * Checks if the wait box is opened or not.
+		 */
+		isWaitBoxOpen: function (): boolean {
+			return this.dialogBox.isWaitBoxOpen();
+		},
+
+		/**
+		 * Opens wait box.
+		 */
+		waitOpen: function (): boolean {
+			return this.dialogBox.waitOpen();
+		},
+
+		/**
+		 * Closes the wait box.
+		 */
+		waitClose: function (): boolean {
+			return this.dialogBox.waitClose();
+		},
+
+		/**
+		 * Opens wait box and closed when the callback function is returned.
+		 */
+		wait: async function <T>(callback: () => Promise<T>): Promise<T> {
+			this.dialogBox.waitOpen();
+			const ret = await callback();
+			this.dialogBox.waitClose();
+			return ret;
 		},
 
 		// ----------------------------------------------------------------------

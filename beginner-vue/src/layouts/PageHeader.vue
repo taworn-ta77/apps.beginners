@@ -65,6 +65,7 @@ export default {
 h1 {
 	margin-right: 1rem;
 	font-size: 200%;
+	font-weight: bold;
 }
 
 #right-bar button {

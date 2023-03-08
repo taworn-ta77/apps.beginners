@@ -1,26 +1,27 @@
 <template>
-	<DialogBox>
-		<div id="body">
-			<header>
-				<PageHeader :title="title"></PageHeader>
-			</header>
+	<div id="body">
+		<header>
+			<PageHeader :title="title"></PageHeader>
+		</header>
 
-			<main>
-				<slot></slot>
-			</main>
+		<main>
+			<slot></slot>
+		</main>
 
-			<footer>
-				<PageFooter></PageFooter>
-			</footer>
-		</div>
-	</DialogBox>
+		<footer>
+			<PageFooter></PageFooter>
+		</footer>
+
+		<DialogBox ref="dialogBox" />
+	</div>
 </template>
 
 
 <script setup lang="ts">
-import DialogBox from './DialogBox.vue';
 import PageHeader from './PageHeader.vue';
 import PageFooter from './PageFooter.vue';
+import DialogBox from './DialogBox.vue';
+import { useAppStore } from '../stores/AppStore';
 </script>
 
 
@@ -39,6 +40,8 @@ export default {
 	},
 
 	mounted() {
+		const dialogBox = this.$refs.dialogBox as InstanceType<typeof DialogBox>
+		useAppStore().setupUi(dialogBox);
 	},
 
 	methods: {
@@ -61,7 +64,7 @@ header {
 }
 
 main {
-	padding: 1.5rem 1.5rem;
+	padding: 2rem 1.5rem;
 	flex: 1 0;
 }
 
